@@ -1,2 +1,2 @@
 # phidget-sensornode
-Source code for a sensor node application on the PhidgetSBC.
+A software application to collect data from a set of Phidget sensors attached to a PhidgetSBC.
