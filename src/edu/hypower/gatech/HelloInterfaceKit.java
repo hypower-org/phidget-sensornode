@@ -16,9 +16,11 @@ public class HelloInterfaceKit {
 		final ConcurrentHashMap<String,Float> dataMap = new ConcurrentHashMap<String, Float>();
 		
 		try {
+			System.out.println("Attaching the Interface Kit Phidget...");
 			final InterfaceKitPhidget ikit = new InterfaceKitPhidget();
 			ikit.openAny();
 			ikit.waitForAttachment();
+			System.out.println("complete.");
 			
 			ScheduledExecutorService exec = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 			
