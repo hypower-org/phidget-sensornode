@@ -1,9 +1,11 @@
-package edu.hypower.gatech;
+package edu.hypower.gatech.phidget;
 
 import com.phidgets.*;
-import com.phidgets.event.*;
+import com.phidgets.event.SensorChangeEvent;
+import com.phidgets.event.SensorChangeListener;
 
 import java.util.concurrent.*;
+import edu.hypower.gatech.phidget.*;
 
 public class HelloInterfaceKit {
 
@@ -21,6 +23,7 @@ public class HelloInterfaceKit {
 			ikit.openAny();
 			ikit.waitForAttachment();
 			System.out.println("complete.");
+			ikit.setRatiometric(true);
 			
 			ScheduledExecutorService exec = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 			
@@ -28,8 +31,8 @@ public class HelloInterfaceKit {
 				public void run() {
 					// temp
 					try {
-						float currTemp = ikit.getSensorValue(0);
-						dataMap.put("T", currTemp);
+						float currTemp = RawDataConverter.temperatureCelsius(ikit.getSensorValue(0));
+						dataMap.put("T", RawDataConverter.toFarenheit(currTemp));
 					} catch (PhidgetException e) {
 						e.printStackTrace();
 					}
@@ -40,7 +43,7 @@ public class HelloInterfaceKit {
 				public void run() {
 					// humidity
 					try {
-						float currHumid = ikit.getSensorValue(1);
+						float currHumid = RawDataConverter.relativeHumidity(ikit.getSensorValue(1));
 						dataMap.put("H", currHumid);
 					} catch (PhidgetException e) {
 						e.printStackTrace();
