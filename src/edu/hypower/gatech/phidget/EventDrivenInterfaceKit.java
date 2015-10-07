@@ -1,8 +1,7 @@
-//package edu.hypower.gatech.phidget;
+package edu.hypower.gatech.phidget;
 
 import com.phidgets.*;
 import com.phidgets.event.*;
-import java.util.concurrent.*;
 
 public class EventDrivenInterfaceKit implements RawDataListener
 //public class EventDrivenInterfaceKit 
