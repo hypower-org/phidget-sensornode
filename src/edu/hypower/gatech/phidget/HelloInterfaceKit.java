@@ -5,7 +5,7 @@ import com.phidgets.event.SensorChangeEvent;
 import com.phidgets.event.SensorChangeListener;
 
 import java.util.concurrent.*;
-import edu.hypower.gatech.phidget.*;
+//import edu.hypower.gatech.phidget.*;
 
 public class HelloInterfaceKit {
 
