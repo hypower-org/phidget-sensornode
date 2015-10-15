@@ -13,16 +13,32 @@ import edu.hypower.gatech.phidget.*;
  */
 public class PhidgetSensorNode {
 
+    final ConcurrentHashMap<String,Float> dataMap = new ConcurrentHashMap<String, Float>();
+
     public static void main(String[] args){
         SensorProps prop = SensorProps.getInstance();
 
         // Load the properties file into the SensorProps data structure. 
-        System.out.println(prop.getAllProperties());
-        //Set new property in
-        if(!prop.containsKey("rate")) prop.setProperty("rate","100");
-        //Verify new property
-        System.out.println(prop.getAllProperties());
-        prop.store();
+        Set<String> propKeys = prop.getAllProperties();
+        Set<String>[] hashKeys = prop.getProperty(propKeys[0]).split(",");
+        String[] periods = prop.getProperty(propKeys[1]).split(",");
+        int numSensors = 0;
+        for(String key: hashKeys) 
+        {
+            if(key != "-1") 
+            {
+                numSensors++;
+
+
+            }
+        }
+        
+
+
+            //Set new property in
+            //Verify new property
+            //System.out.println(prop.getAllProperties());
+            //prop.store();
     }
 
 }
