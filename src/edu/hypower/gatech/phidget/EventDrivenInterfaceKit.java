@@ -1,4 +1,4 @@
-//package edu.hypower.gatech.phidget;
+package edu.hypower.gatech.phidget;
 
 import com.phidgets.*;
 import com.phidgets.event.*;
