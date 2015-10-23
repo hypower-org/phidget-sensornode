@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,11 +31,12 @@ import com.phidgets.PhidgetException;
  */
 public class PhidgetSensorNode {
 
-    public static void main(String[] args){
+    // Stores the raw data as a simple map from sensor name to its floating point value.
+//  final ConcurrentHashMap<String, Float> rawDataMap = new ConcurrentHashMap<String, Float>();
+	private final ConcurrentHashMap<String, BlockingQueue<Float>> rawDataMap = new ConcurrentHashMap<String, BlockingQueue<Float>>();
+	private final HashMap<String, Runnable> sensorRuns = new HashMap<String, Runnable>();
 
-        // Stores the raw data as a simple map from sensor name to its floating point value.
-        final ConcurrentHashMap<String, Float> rawDataMap = new ConcurrentHashMap<String, Float>();
-        final HashMap<String, Runnable> sensorRuns = new HashMap<String, Runnable>();
+	public PhidgetSensorNode(String pathToConfig){
 
         /*
          * Sensor Node structure
@@ -51,27 +54,22 @@ public class PhidgetSensorNode {
             Iterator<Entry<String, JsonNode>> iter = rootNode.get("sensors").fields();
             while(iter.hasNext()){
             	Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) iter.next();
-            	String sensorName = entry.getKey();
             	Integer location = entry.getValue().get("location").asInt();
             	Integer updatePeriod = entry.getValue().get("update-period").asInt();
-            	System.out.println(sensorName + "." + location + ", updating every " + updatePeriod + "ms");
-            	sensorRuns.put(sensorName + "." + location, new Runnable(){
-
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						
-					}
-            		
-            	});
+            	String sensorKey = entry.getKey() + "." + location;
+            	
+            	System.out.println(sensorKey + ", updating every " + updatePeriod + "ms");
+            	
+            	rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1)); // a Buffer of one float!
+            	
+            	// Build a SensorReader for each sensor configuration! Pass in the reference to the data queue.
+            	
             }
+         
+            // 3 - Load parameters for the server
             
-            
-            // 2 - Sensor data setup
-
-            // 3 - establish connection to the collection server
-            
-            // 4 - spawn the collection of runnables that send data to the server using the specified update rate.
+            // 4 - create the network clients that wait on new data to be available in a blocking queue
+            // The client runnable only executes when its assigned data is ready for transmission.
 
         } catch (JsonProcessingException e) {
             System.err.println("JSON ERROR: " + e.getMessage());
@@ -81,10 +79,9 @@ public class PhidgetSensorNode {
             System.exit(-1);
         }
 
-        System.exit(0);
-    }
-    
-    final static void startInterfaceKit(){
+	}
+	
+    private final void startInterfaceKit(){
 		System.out.println("Attaching the Interface Kit Phidget...");
 		InterfaceKitPhidget ikit;
 		try {
@@ -100,4 +97,11 @@ public class PhidgetSensorNode {
 		}
     }
 
+	
+    public static void main(String[] args){
+
+    	final PhidgetSensorNode node = new PhidgetSensorNode("");
+        System.exit(0);
+    }
+    
 }
