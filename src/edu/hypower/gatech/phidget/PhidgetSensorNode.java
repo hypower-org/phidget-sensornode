@@ -3,6 +3,10 @@ package edu.hypower.gatech.phidget;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +16,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.phidgets.InterfaceKitPhidget;
+import com.phidgets.PhidgetException;
 
 /**
  * This class implements the startup process for a phidget-sensornode: 1) configuration file
@@ -23,10 +29,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class PhidgetSensorNode {
 
-    // Stores the raw data as a simple map from sensor name to its floating point value.
-    final ConcurrentHashMap<String,Float> rawDataMap = new ConcurrentHashMap<String, Float>();
-
     public static void main(String[] args){
+
+        // Stores the raw data as a simple map from sensor name to its floating point value.
+        final ConcurrentHashMap<String, Float> rawDataMap = new ConcurrentHashMap<String, Float>();
+        final HashMap<String, Runnable> sensorRuns = new HashMap<String, Runnable>();
 
         /*
          * Sensor Node structure
@@ -37,12 +44,30 @@ public class PhidgetSensorNode {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(new File("sensornode.json"));
             System.out.println("Sensor node IP Address: " + rootNode.get("ip-address"));
-            JsonNode sensorsNode = rootNode.get("sensors");
+            
+            // Phidget initialization
+            startInterfaceKit();
+            
+            Iterator<Entry<String, JsonNode>> iter = rootNode.get("sensors").fields();
+            while(iter.hasNext()){
+            	Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) iter.next();
+            	String sensorName = entry.getKey();
+            	Integer location = entry.getValue().get("location").asInt();
+            	Integer updatePeriod = entry.getValue().get("update-period").asInt();
+            	System.out.println(sensorName + "." + location + ", updating every " + updatePeriod + "ms");
+            	sensorRuns.put(sensorName + "." + location, new Runnable(){
 
-            // 2 - Create a collection of EVENT driven sensors that load the data map when their sensors change.
-            // We need to create our own sensor change listeners that write to the dataMap
-            // when new data is available. They should perform the conversion of the raw data value to the 
-            // appropriate floating point representation, i.e. temperature is in Celsius.
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						
+					}
+            		
+            	});
+            }
+            
+            
+            // 2 - Sensor data setup
 
             // 3 - establish connection to the collection server
             
@@ -57,6 +82,22 @@ public class PhidgetSensorNode {
         }
 
         System.exit(0);
+    }
+    
+    final static void startInterfaceKit(){
+		System.out.println("Attaching the Interface Kit Phidget...");
+		InterfaceKitPhidget ikit;
+		try {
+			ikit = new InterfaceKitPhidget();
+			ikit.openAny();
+			ikit.waitForAttachment();
+			System.out.println("complete.");
+			ikit.setRatiometric(true);
+
+		} catch (PhidgetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 }

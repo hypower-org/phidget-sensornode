@@ -1,4 +1,5 @@
 {
 	"ip-address" : "10.10.10.1",
-	"sensors" : { "temp" : { "location" : 0, "update-period" : 100 } }
+	"sensors" : { "temperature" : { "location" : 0, "update-period" : 100 },
+				  "humidity" : { "location" : 1, "update-period" : 500 } }
 }
