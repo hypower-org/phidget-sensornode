@@ -39,6 +39,8 @@
             <groupId>edu.hypower.gatech.phidget</groupId>
             <artifactId>phidget</artifactId>
             <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/phidget21.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

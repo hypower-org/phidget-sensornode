@@ -1,0 +1,2 @@
+sudo mvn exec:java -Dexec.mainClass="edu.hypower.gatech.phidget.PhidgetSensorNode"
+
