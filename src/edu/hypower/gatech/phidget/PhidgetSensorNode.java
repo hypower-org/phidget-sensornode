@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,12 +39,14 @@ public class PhidgetSensorNode {
             System.out.println("Sensor node IP Address: " + rootNode.get("ip-address"));
             JsonNode sensorsNode = rootNode.get("sensors");
 
+            // 2 - Create a collection of EVENT driven sensors that load the data map when their sensors change.
+            // We need to create our own sensor change listeners that write to the dataMap
+            // when new data is available. They should perform the conversion of the raw data value to the 
+            // appropriate floating point representation, i.e. temperature is in Celsius.
 
-            // 2 - Create a collection of runnables that collect data from the sensors; associate each with the update period value
-
-            // 3 - submit all sensor collecting runnables to the timed executor
-
-            // 4 - establish connection to the server
+            // 3 - establish connection to the collection server
+            
+            // 4 - spawn the collection of runnables that send data to the server using the specified update rate.
 
         } catch (JsonProcessingException e) {
             System.err.println("JSON ERROR: " + e.getMessage());
