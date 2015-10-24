@@ -48,5 +48,5 @@ public abstract class SensorReader implements Runnable {
 	 * @return
 	 */
 	public abstract float convertFromRaw(int rawVal);
-	
+
 }

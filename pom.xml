@@ -36,11 +36,11 @@
             <version>2.6.3</version>
         </dependency>
         <dependency>
-            <groupId>edu.hypower.gatech.phidget</groupId>
-            <artifactId>phidget</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/phidget21.jar</systemPath>
+            <groupId>com</groupId>
+            <artifactId>phidgets</artifactId>
+            <version>2.1</version>
+            <!--scope>system</scope>
+            <systemPath>${project.basedir}/src/phidget21.jar</systemPath-->
         </dependency>
     </dependencies>
 </project>

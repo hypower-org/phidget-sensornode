@@ -19,7 +19,7 @@ public class TemperatureSensor implements SensorChangeListener {
 	public TemperatureSensor(ConcurrentHashMap<String,Float> map){
 		dataMap = map;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.phidgets.event.SensorChangeListener#sensorChanged(com.phidgets.event.SensorChangeEvent)
 	 */

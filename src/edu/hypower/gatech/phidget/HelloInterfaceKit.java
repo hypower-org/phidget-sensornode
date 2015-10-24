@@ -65,7 +65,7 @@ public class HelloInterfaceKit {
 			};
 			exec.scheduleAtFixedRate(tempTask, 0, tempPeriod, TimeUnit.MILLISECONDS);
 			exec.scheduleAtFixedRate(humidTask, 0, humidPeriod, TimeUnit.MILLISECONDS);
-//			exec.scheduleAtFixedRate(motionTask, 0, motionPeriod, TimeUnit.MILLISECONDS);
+			exec.scheduleAtFixedRate(motionTask, 0, motionPeriod, TimeUnit.MILLISECONDS);
 
 			while(true){
 				try {
