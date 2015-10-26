@@ -19,7 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.phidgets.InterfaceKitPhidget;
 import com.phidgets.PhidgetException;
 
-import edu.hypower.gatech.phidget.sensor.*;
+import edu.hypower.gatech.phidget.sensor.SensorReader;
+import edu.hypower.gatech.phidget.sensor.TemperatureSensorReader;
 
 /**
  * This class implements the startup process for a phidget-sensornode: 1)
@@ -77,6 +78,8 @@ public class PhidgetSensorNode {
 
 					// Build a SensorReader for each sensor configuration! Pass
 					// in the reference to the data queue.
+					// TODO: Need to create the particular sensor that matches what is provided in the JSON
+					// file -- Java use reflection. We may need to change class names.
 					SensorReader sensor = new TemperatureSensorReader(location, sensorKey, ikit,
 							(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey));
 					sensorRuns.put(sensorKey, sensor);
