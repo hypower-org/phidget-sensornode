@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.lang.reflect.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,7 +21,7 @@ import com.phidgets.InterfaceKitPhidget;
 import com.phidgets.PhidgetException;
 
 import edu.hypower.gatech.phidget.sensor.SensorReader;
-import edu.hypower.gatech.phidget.sensor.TemperatureSensorReader;
+import edu.hypower.gatech.phidget.sensor.temperatureSensorReader;
 
 /**
  * This class implements the startup process for a phidget-sensornode: 1)
@@ -37,6 +38,7 @@ public class PhidgetSensorNode {
 	// final ConcurrentHashMap<String, Float> rawDataMap = new
 	// ConcurrentHashMap<String, Float>();
 	private final static ConcurrentHashMap<String, BlockingQueue<Float>> rawDataMap = new ConcurrentHashMap<String, BlockingQueue<Float>>();
+	private static final int Float = 0;
 	private final HashMap<String, Runnable> sensorRuns = new HashMap<String, Runnable>();
 
 	public PhidgetSensorNode(String pathToConfig) {
@@ -74,15 +76,51 @@ public class PhidgetSensorNode {
 					System.out.println(sensorKey + ", updating every " + updatePeriod + "ms");
 
 					// a buffer of one float
-					rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1)); 
+					rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1));
 
 					// Build a SensorReader for each sensor configuration! Pass
 					// in the reference to the data queue.
-					// TODO: Need to create the particular sensor that matches what is provided in the JSON
-					// file -- Java use reflection. We may need to change class names.
-					SensorReader sensor = new TemperatureSensorReader(location, sensorKey, ikit,
-							(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey));
-					sensorRuns.put(sensorKey, sensor);
+					// TODO: Need to create the particular sensor that matches
+					// what is provided in the JSON
+					// file -- Java use reflection. We may need to change class
+					// names.
+					Class<?> sensor = null;
+					try {
+						sensor = Class.forName(entry.getKey() + "SensorReader");
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					Class[] param = { Integer.class, String.class, InterfaceKitPhidget.class,
+							ArrayBlockingQueue.class };
+					Constructor<?> cons = null;
+					try {
+						cons = sensor.getConstructor(param);
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					try {
+						sensorRuns.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
+								(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
 					exec.scheduleAtFixedRate(sensorRuns.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
 				}
 			} catch (PhidgetException e) {
