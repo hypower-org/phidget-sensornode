@@ -20,8 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.phidgets.InterfaceKitPhidget;
 import com.phidgets.PhidgetException;
 
-import edu.hypower.gatech.phidget.sensor.SensorReader;
-import edu.hypower.gatech.phidget.sensor.temperatureSensorReader;
+import edu.hypower.gatech.phidget.sensor.*;
 
 /**
  * This class implements the startup process for a phidget-sensornode: 1)
@@ -38,10 +37,9 @@ public class PhidgetSensorNode {
 	// final ConcurrentHashMap<String, Float> rawDataMap = new
 	// ConcurrentHashMap<String, Float>();
 	private final static ConcurrentHashMap<String, BlockingQueue<Float>> rawDataMap = new ConcurrentHashMap<String, BlockingQueue<Float>>();
-	private static final int Float = 0;
 	private final HashMap<String, Runnable> sensorRuns = new HashMap<String, Runnable>();
 
-	public PhidgetSensorNode(String pathToConfig) {
+	public PhidgetSensorNode(String pathToConfig) throws Exception {
 
 		/*
 		 * Sensor Node structure
@@ -84,44 +82,17 @@ public class PhidgetSensorNode {
 					// what is provided in the JSON
 					// file -- Java use reflection. We may need to change class
 					// names.
-					Class<?> sensor = null;
-					try {
-						sensor = Class.forName(entry.getKey() + "SensorReader");
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					Class<?> sensor = Class
+							.forName("edu.hypower.gatech.phidget.sensor." + entry.getKey() + "SensorReader");
 					Class[] param = { Integer.class, String.class, InterfaceKitPhidget.class,
 							ArrayBlockingQueue.class };
-					Constructor<?> cons = null;
-					try {
-						cons = sensor.getConstructor(param);
-					} catch (NoSuchMethodException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					Constructor<?> cons = sensor.getConstructor(param);
 
-					try {
-						sensorRuns.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
-								(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
-					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					sensorRuns.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
+							(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
 
 					exec.scheduleAtFixedRate(sensorRuns.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
+
 				}
 			} catch (PhidgetException e) {
 				// TODO Auto-generated catch block
@@ -145,9 +116,21 @@ public class PhidgetSensorNode {
 
 	}
 
+	/*
+	 * private humiditySensorReader humiditySensorReader(Integer location,
+	 * String sensorKey, InterfaceKitPhidget ikit,
+	 * ArrayBlockingQueue<java.lang.Float> arrayBlockingQueue) { // TODO
+	 * Auto-generated method stub return null; }
+	 */
+
 	public static void main(String[] args) {
 
-		final PhidgetSensorNode node = new PhidgetSensorNode("");
+		try {
+			final PhidgetSensorNode node = new PhidgetSensorNode("");
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		while (true) {
 			try {

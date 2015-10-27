@@ -12,9 +12,7 @@ public abstract class SensorReader implements Runnable {
 	private final ArrayBlockingQueue<Float> sensorQ;
 	private final InterfaceKitPhidget interfaceKit;
 
-	
-	
-	public SensorReader(int location, String sensorKey, InterfaceKitPhidget interfaceKit, ArrayBlockingQueue<Float> q) {
+	public SensorReader(Integer location, String sensorKey, InterfaceKitPhidget interfaceKit, ArrayBlockingQueue<Float> q) {
 		this.location = location;
 		this.sensorKey = sensorKey;
 		this.interfaceKit = interfaceKit;
@@ -23,11 +21,12 @@ public abstract class SensorReader implements Runnable {
 
 	@Override
 	public final void run() {
-		
+
 		try {
-			float data = this.convertFromRaw( interfaceKit.getSensorValue(location) );
-			sensorQ.offer(data); // returns true if it worked, or false. Just ignore for now.
-			
+			float data = this.convertFromRaw(interfaceKit.getSensorValue(location));
+			sensorQ.offer(data); // returns true if it worked, or false. Just
+									// ignore for now.
+
 		} catch (PhidgetException e) {
 			System.err.println("Error: cannot get sensor data.");
 		}
@@ -44,6 +43,7 @@ public abstract class SensorReader implements Runnable {
 
 	/**
 	 * SensorReaders must compute the
+	 * 
 	 * @param rawVal
 	 * @return
 	 */
