@@ -76,12 +76,6 @@ public class PhidgetSensorNode {
 					// a buffer of one float
 					rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1));
 
-					// Build a SensorReader for each sensor configuration! Pass
-					// in the reference to the data queue.
-					// TODO: Need to create the particular sensor that matches
-					// what is provided in the JSON
-					// file -- Java use reflection. We may need to change class
-					// names.
 					Class<?> sensor = Class
 							.forName("edu.hypower.gatech.phidget.sensor." + entry.getKey() + "SensorReader");
 					Class[] param = { Integer.class, String.class, InterfaceKitPhidget.class,
@@ -115,13 +109,6 @@ public class PhidgetSensorNode {
 		}
 
 	}
-
-	/*
-	 * private humiditySensorReader humiditySensorReader(Integer location,
-	 * String sensorKey, InterfaceKitPhidget ikit,
-	 * ArrayBlockingQueue<java.lang.Float> arrayBlockingQueue) { // TODO
-	 * Auto-generated method stub return null; }
-	 */
 
 	public static void main(String[] args) {
 
