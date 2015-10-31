@@ -7,7 +7,7 @@ import com.phidgets.PhidgetException;
 
 public abstract class SensorReader implements Runnable {
 
-	private final int location;
+	private final Integer location;
 	private final String sensorKey;
 	private final ArrayBlockingQueue<Float> sensorQ;
 	private final InterfaceKitPhidget interfaceKit;

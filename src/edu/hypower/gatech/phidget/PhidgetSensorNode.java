@@ -69,15 +69,17 @@ public class PhidgetSensorNode {
 					Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) iter.next();
 					Integer location = entry.getValue().get("location").asInt();
 					Integer updatePeriod = entry.getValue().get("update-period").asInt();
-					String sensorKey = entry.getKey() + "." + location;
+					String sensorStr = entry.getKey();
+					String sensorKey = sensorStr + "." + location;
 
 					System.out.println(sensorKey + ", updating every " + updatePeriod + "ms");
 
 					// a buffer of one float
 					rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1));
 
+					String sensorName = Character.toUpperCase(sensorStr.charAt(0)) + sensorStr.substring(1, sensorStr.length());
 					Class<?> sensor = Class
-							.forName("edu.hypower.gatech.phidget.sensor." + entry.getKey() + "SensorReader");
+							.forName("edu.hypower.gatech.phidget.sensor." + sensorName + "SensorReader");
 					Class[] param = { Integer.class, String.class, InterfaceKitPhidget.class,
 							ArrayBlockingQueue.class };
 					Constructor<?> cons = sensor.getConstructor(param);

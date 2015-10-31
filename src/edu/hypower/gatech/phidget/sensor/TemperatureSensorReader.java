@@ -4,9 +4,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import com.phidgets.InterfaceKitPhidget;
 
-public class temperatureSensorReader extends SensorReader {
+public class TemperatureSensorReader extends SensorReader {
 
-	public temperatureSensorReader(Integer location, String sensorKey, InterfaceKitPhidget interfaceKit,
+	public TemperatureSensorReader(Integer location, String sensorKey, InterfaceKitPhidget interfaceKit,
 			ArrayBlockingQueue<Float> q) {
 		super(location, sensorKey, interfaceKit, q);
 		// TODO Auto-generated constructor stub

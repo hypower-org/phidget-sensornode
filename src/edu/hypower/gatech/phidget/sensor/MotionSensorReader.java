@@ -4,9 +4,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import com.phidgets.InterfaceKitPhidget;
 
-public class humiditySensorReader extends SensorReader {
+public class MotionSensorReader extends SensorReader {
 
-	public humiditySensorReader(Integer location, String sensorKey, InterfaceKitPhidget interfaceKit,
+	public MotionSensorReader(Integer location, String sensorKey, InterfaceKitPhidget interfaceKit,
 			ArrayBlockingQueue<Float> q) {
 		super(location, sensorKey, interfaceKit, q);
 		// TODO Auto-generated constructor stub
@@ -14,7 +14,7 @@ public class humiditySensorReader extends SensorReader {
 
 	@Override
 	public float convertFromRaw(int rawVal) {
-		return (float) ((rawVal * 0.1906) - 40.2);
+		return (float) rawVal;
 	}
 
 }

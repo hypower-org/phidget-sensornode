@@ -6,7 +6,7 @@ import com.phidgets.InterfaceKitPhidget;
 
 public class HumiditySensorReader extends SensorReader{
 
-	public HumiditySensorReader(int location, String sensorKey, InterfaceKitPhidget interfaceKit,
+	public HumiditySensorReader(Integer location, String sensorKey, InterfaceKitPhidget interfaceKit,
 			ArrayBlockingQueue<Float> q) {
 		super(location, sensorKey, interfaceKit, q);
 		// TODO Auto-generated constructor stub
