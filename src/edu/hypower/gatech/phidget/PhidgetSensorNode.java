@@ -78,29 +78,32 @@ public class PhidgetSensorNode {
 					rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1));
 
 					String sensorName = Character.toUpperCase(sensorStr.charAt(0)) + sensorStr.substring(1, sensorStr.length());
-					Class<?> sensor = Class
-							.forName("edu.hypower.gatech.phidget.sensor." + sensorName + "SensorReader");
-					Class[] param = { Integer.class, String.class, InterfaceKitPhidget.class,
-							ArrayBlockingQueue.class };
-					Constructor<?> cons = sensor.getConstructor(param);
+					try {
+						Class<?> sensor = Class
+								.forName("edu.hypower.gatech.phidget.sensor." + sensorName + "SensorReader");
+						Constructor<?> cons = sensor.getConstructor(Integer.class, String.class, InterfaceKitPhidget.class, ArrayBlockingQueue.class);
 
-					sensorRuns.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
-							(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
+						sensorRuns.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
+								(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
 
-					exec.scheduleAtFixedRate(sensorRuns.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
+						exec.scheduleAtFixedRate(sensorRuns.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
 
+						// 3 - Load parameters for the server
+
+						// 4 - create the network clients that wait on new data to be
+						// available in a blocking queue
+						// The client runnable only executes when its assigned data is ready
+						// for transmission.
+					} catch (ClassNotFoundException cnfe){
+						System.err.println("ERROR: " + sensorName + " not implemented.");
+						
+					}
 				}
 			} catch (PhidgetException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-			// 3 - Load parameters for the server
-
-			// 4 - create the network clients that wait on new data to be
-			// available in a blocking queue
-			// The client runnable only executes when its assigned data is ready
-			// for transmission.
 
 		} catch (JsonProcessingException e) {
 			System.err.println("JSON ERROR: " + e.getMessage());
@@ -123,11 +126,11 @@ public class PhidgetSensorNode {
 
 		while (true) {
 			try {
-				Thread.sleep(500);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println(rawDataMap);
+			System.out.println("Node running: " + rawDataMap.keySet());
 		}
 	}
 
