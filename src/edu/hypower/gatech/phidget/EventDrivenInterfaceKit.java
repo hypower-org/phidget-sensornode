@@ -3,6 +3,7 @@ package edu.hypower.gatech.phidget;
 import com.phidgets.*;
 import com.phidgets.event.*;
 
+@Deprecated
 public class EventDrivenInterfaceKit implements RawDataListener
 // public class EventDrivenInterfaceKit
 {

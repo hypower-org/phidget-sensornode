@@ -32,29 +32,24 @@ import edu.hypower.gatech.phidget.sensor.*;
  */
 public class PhidgetSensorNode {
 
-	// Stores the raw data as a simple map from sensor name to its floating
-	// point value.
-	// final ConcurrentHashMap<String, Float> rawDataMap = new
-	// ConcurrentHashMap<String, Float>();
-	private final static ConcurrentHashMap<String, BlockingQueue<Float>> rawDataMap = new ConcurrentHashMap<String, BlockingQueue<Float>>();
+	// Maps sensors to their associated data value - blocking queue will have one element
+	// to allow event driven network clients.
+	private final ConcurrentHashMap<String, BlockingQueue<Float>> rawDataMap = new ConcurrentHashMap<String, BlockingQueue<Float>>();
+	// Maps sensors to their associated runnable task.
 	private final HashMap<String, Runnable> sensorRuns = new HashMap<String, Runnable>();
 
-	public PhidgetSensorNode(String pathToConfig) throws Exception {
+	public PhidgetSensorNode(String pathToConfig) {
 
-		/*
-		 * Sensor Node structure
-		 */
 		try {
 
-			// 1 - Read in properties file, which is JSON
+			// Read in properties file, which is JSON
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode rootNode = mapper.readTree(new File("sensornode.json"));
 			System.out.println("Sensor node IP Address: " + rootNode.get("ip-address"));
 
-			// Phidget initialization
-
 			System.out.println("Attaching the Interface Kit Phidget...");
 			try {
+				// Phidget initialization
 				InterfaceKitPhidget ikit = new InterfaceKitPhidget();
 				ikit.openAny();
 				ikit.waitForAttachment();
@@ -72,17 +67,16 @@ public class PhidgetSensorNode {
 					String sensorStr = entry.getKey();
 					String sensorKey = sensorStr + "." + location;
 
-					System.out.println(sensorKey + ", updating every " + updatePeriod + "ms");
-
-					// a buffer of one float
-					rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1));
-
 					String sensorName = Character.toUpperCase(sensorStr.charAt(0)) + sensorStr.substring(1, sensorStr.length());
 					try {
 						Class<?> sensor = Class
 								.forName("edu.hypower.gatech.phidget.sensor." + sensorName + "SensorReader");
 						Constructor<?> cons = sensor.getConstructor(Integer.class, String.class, InterfaceKitPhidget.class, ArrayBlockingQueue.class);
 
+						System.out.println(sensorKey + ", updating every " + updatePeriod + "ms");
+
+						rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1));
+						
 						sensorRuns.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
 								(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
 
@@ -94,9 +88,28 @@ public class PhidgetSensorNode {
 						// available in a blocking queue
 						// The client runnable only executes when its assigned data is ready
 						// for transmission.
+						
 					} catch (ClassNotFoundException cnfe){
 						System.err.println("ERROR: " + sensorName + " not implemented.");
 						
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			} catch (PhidgetException e) {
@@ -114,23 +127,41 @@ public class PhidgetSensorNode {
 		}
 
 	}
+	
+	public final ConcurrentHashMap<String, BlockingQueue<Float>> getRawDataMap() {
+		return rawDataMap;
+	}
 
 	public static void main(String[] args) {
 
-		try {
-			final PhidgetSensorNode node = new PhidgetSensorNode("");
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		final PhidgetSensorNode node = new PhidgetSensorNode("");
 
+		// Example runnable that only takes action only when a new data value is on the queue. Hardcoded for now.
+		Runnable r = new Runnable(){
+
+			@Override
+			public void run() {
+				while(true){
+					try {								
+						Float f = node.getRawDataMap().get("temperature.0").take();
+						System.out.println(Thread.currentThread().getName() + " new data = " + f);
+					} catch (InterruptedException e) {
+						
+						e.printStackTrace();
+					}
+				}
+			}	
+		};
+		Thread reader = new Thread(r);
+		reader.start();
+		
 		while (true) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Node running: " + rawDataMap.keySet());
+			System.out.println("Node running: " + node.getRawDataMap().keySet());
 		}
 	}
 

@@ -7,6 +7,7 @@ import com.phidgets.event.SensorChangeListener;
 import java.util.concurrent.*;
 //import edu.hypower.gatech.phidget.*;
 
+@Deprecated
 public class HelloInterfaceKit {
 
 	public static void main(String[] args) {

@@ -6,6 +6,7 @@ package edu.hypower.gatech.phidget;
  * @author Patrick J.Martin
  */
 
+@Deprecated
 public class RawDataConverter {
 
 	/*
