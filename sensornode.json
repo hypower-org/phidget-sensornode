@@ -1,6 +1,6 @@
 {
 	"ip-address" : "10.10.10.1",
 	"sensors" : { "temperature" : { "location" : 0, "update-period" : 500 },
-				  "humidity" : { "location" : 1, "update-period" : 1000 } ,
-				  "motion" : { "location" : 2, "update-period" : 100 } }
+				  "humidity" : { "location" : 1, "update-period" : 1000 }
+				}
 }

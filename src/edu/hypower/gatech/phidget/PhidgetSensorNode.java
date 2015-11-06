@@ -2,6 +2,7 @@ package edu.hypower.gatech.phidget;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.phidgets.InterfaceKitPhidget;
 import com.phidgets.PhidgetException;
 
+import edu.hypower.gatech.phidget.comm.SensorNodeClient;
 import edu.hypower.gatech.phidget.sensor.*;
 
 /**
@@ -36,7 +39,10 @@ public class PhidgetSensorNode {
 	// to allow event driven network clients.
 	private final ConcurrentHashMap<String, BlockingQueue<Float>> rawDataMap = new ConcurrentHashMap<String, BlockingQueue<Float>>();
 	// Maps sensors to their associated runnable task.
-	private final HashMap<String, Runnable> sensorRuns = new HashMap<String, Runnable>();
+	private final HashMap<String, Runnable> sensorUpdateRunners = new HashMap<String, Runnable>();
+	private final HashMap<String, Runnable> sensorClientRunners = new HashMap<String, Runnable>();
+	
+	private String nodeIpAddr;
 
 	public PhidgetSensorNode(String pathToConfig) {
 
@@ -45,7 +51,8 @@ public class PhidgetSensorNode {
 			// Read in properties file, which is JSON
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode rootNode = mapper.readTree(new File("sensornode.json"));
-			System.out.println("Sensor node IP Address: " + rootNode.get("ip-address"));
+			nodeIpAddr = rootNode.get("ip-address").asText();
+			System.out.println("Sensor node IP Address: " + nodeIpAddr);
 
 			System.out.println("Attaching the Interface Kit Phidget...");
 			try {
@@ -56,8 +63,9 @@ public class PhidgetSensorNode {
 				System.out.println("complete.");
 				ikit.setRatiometric(true);
 
-				ScheduledExecutorService exec = Executors
+				ScheduledExecutorService schedExec = Executors
 						.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+				ExecutorService exec = Executors.newCachedThreadPool();
 
 				Iterator<Entry<String, JsonNode>> iter = rootNode.get("sensors").fields();
 				while (iter.hasNext()) {
@@ -77,11 +85,14 @@ public class PhidgetSensorNode {
 
 						rawDataMap.putIfAbsent(sensorKey, new ArrayBlockingQueue<Float>(1));
 						
-						sensorRuns.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
+						sensorUpdateRunners.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
 								(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
+						SensorNodeClient client = new SensorNodeClient((ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey), sensorKey, "", new Long(1000)); 
+						sensorClientRunners.put(sensorKey, client);
 
-						exec.scheduleAtFixedRate(sensorRuns.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
-
+						schedExec.scheduleAtFixedRate(sensorUpdateRunners.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
+						exec.submit(sensorClientRunners.get(sensorKey));
+						
 						// 3 - Load parameters for the server
 
 						// 4 - create the network clients that wait on new data to be
@@ -128,32 +139,40 @@ public class PhidgetSensorNode {
 
 	}
 	
-	public final ConcurrentHashMap<String, BlockingQueue<Float>> getRawDataMap() {
-		return rawDataMap;
-	}
+//	public final ConcurrentHashMap<String, BlockingQueue<Float>> getRawDataMap() {
+//		return rawDataMap;
+//	}
 
+	public final ArrayList<String> getSensorNames(){
+		final ArrayList<String> sensors = new ArrayList<String>();
+		for(String s : rawDataMap.keySet()){
+			sensors.add(s);
+		}
+		return sensors;
+	}
+	
 	public static void main(String[] args) {
 
 		final PhidgetSensorNode node = new PhidgetSensorNode("");
 
 		// Example runnable that only takes action only when a new data value is on the queue. Hardcoded for now.
-		Runnable r = new Runnable(){
-
-			@Override
-			public void run() {
-				while(true){
-					try {								
-						Float f = node.getRawDataMap().get("temperature.0").take();
-						System.out.println(Thread.currentThread().getName() + " new data = " + f);
-					} catch (InterruptedException e) {
-						
-						e.printStackTrace();
-					}
-				}
-			}	
-		};
-		Thread reader = new Thread(r);
-		reader.start();
+//		Runnable r = new Runnable(){
+//
+//			@Override
+//			public void run() {
+//				while(true){
+//					try {								
+//						Float f = node.getRawDataMap().get("temperature.0").take();
+//						System.out.println(Thread.currentThread().getName() + " new data = " + f);
+//					} catch (InterruptedException e) {
+//						
+//						e.printStackTrace();
+//					}
+//				}
+//			}	
+//		};
+//		Thread reader = new Thread(r);
+//		reader.start();
 		
 		while (true) {
 			try {
@@ -161,7 +180,7 @@ public class PhidgetSensorNode {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Node running: " + node.getRawDataMap().keySet());
+			System.out.println("Node running: " + node.getSensorNames());
 		}
 	}
 
