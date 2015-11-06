@@ -87,18 +87,12 @@ public class PhidgetSensorNode {
 						
 						sensorUpdateRunners.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
 								(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
-						SensorNodeClient client = new SensorNodeClient((ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey), sensorKey, "", new Long(1000)); 
+						SensorNodeClient client = new SensorNodeClient((ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey), 
+														nodeIpAddr, sensorKey, "", new Long(1000)); 
 						sensorClientRunners.put(sensorKey, client);
 
 						schedExec.scheduleAtFixedRate(sensorUpdateRunners.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
 						exec.submit(sensorClientRunners.get(sensorKey));
-						
-						// 3 - Load parameters for the server
-
-						// 4 - create the network clients that wait on new data to be
-						// available in a blocking queue
-						// The client runnable only executes when its assigned data is ready
-						// for transmission.
 						
 					} catch (ClassNotFoundException cnfe){
 						System.err.println("ERROR: " + sensorName + " not implemented.");

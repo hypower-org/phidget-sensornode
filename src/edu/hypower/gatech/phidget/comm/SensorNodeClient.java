@@ -4,6 +4,10 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * The client side of the PhidgetSensorNode.
  * 
@@ -16,12 +20,14 @@ public class SensorNodeClient implements Runnable {
 	private final String sensorKey;
 	private final String serverIpAddr;
 	private final Long serverPort;
+	private final String ipAddr;
 	
-	public SensorNodeClient(ArrayBlockingQueue<Float> sensorQ, String sensorKey, String serverIpAddr, Long serverPort){
+	public SensorNodeClient(ArrayBlockingQueue<Float> sensorQ, String ipAddr, String sensorKey, String serverIpAddr, Long serverPort){
 		this.sensorQ = sensorQ;
 		this.sensorKey = sensorKey;
 		this.serverIpAddr = serverIpAddr;
 		this.serverPort = serverPort;
+		this.ipAddr = ipAddr;
 	}
 	
 	@Override
@@ -37,8 +43,19 @@ public class SensorNodeClient implements Runnable {
 		}
 	}
 	
+	/**
+	 * Takes a floating point data value and pacakges it into a JSON message for the
+	 * DataCollectionServer.
+	 * @param dataValue
+	 */
 	private final void sendData(Float dataValue){
 		System.out.println("Sending new data! " + sensorKey + ": " + dataValue);
+		
+		String[] sensorKeyParts = sensorKey.split(".");
+		/*
+		 * JSON message format: { "node-ip-addr" : ipAddr, "sensor-type" : sensorKey name,
+		 * 							"sensor-location" : int, "data-value" : float}
+		 */
 	}
 	
 //	public static void main(String argv[]) throws Exception {
