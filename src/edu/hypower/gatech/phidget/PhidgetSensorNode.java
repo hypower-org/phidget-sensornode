@@ -53,6 +53,9 @@ public class PhidgetSensorNode {
 			JsonNode rootNode = mapper.readTree(new File("sensornode.json"));
 			nodeIpAddr = rootNode.get("ip-address").asText();
 			System.out.println("Sensor node IP Address: " + nodeIpAddr);
+			String serverIpAddr = rootNode.get("server-ip-addr").asText();
+			Integer serverPort = rootNode.get("server-port").asInt();
+			System.out.println("Data Collection server IP Address: " + serverIpAddr + ", port " + serverPort);
 
 			System.out.println("Attaching the Interface Kit Phidget...");
 			try {
@@ -88,7 +91,7 @@ public class PhidgetSensorNode {
 						sensorUpdateRunners.put(sensorKey, (SensorReader) cons.newInstance(location, sensorKey, ikit,
 								(ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey)));
 						SensorNodeClient client = new SensorNodeClient((ArrayBlockingQueue<Float>) rawDataMap.get(sensorKey), 
-														nodeIpAddr, sensorKey, "", new Long(1000)); 
+														nodeIpAddr, sensorKey, serverIpAddr, serverPort); 
 						sensorClientRunners.put(sensorKey, client);
 
 						schedExec.scheduleAtFixedRate(sensorUpdateRunners.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);

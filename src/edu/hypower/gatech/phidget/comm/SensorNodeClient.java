@@ -2,6 +2,7 @@ package edu.hypower.gatech.phidget.comm;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -19,43 +20,50 @@ public class SensorNodeClient implements Runnable {
 	private final ArrayBlockingQueue<Float> sensorQ;
 	private final String sensorKey;
 	private final String serverIpAddr;
-	private final Long serverPort;
+	private final Integer serverPort;
 	private final String ipAddr;
 	
-	public SensorNodeClient(ArrayBlockingQueue<Float> sensorQ, String ipAddr, String sensorKey, String serverIpAddr, Long serverPort){
+	public SensorNodeClient(ArrayBlockingQueue<Float> sensorQ, String ipAddr, String sensorKey, String serverIpAddr, Integer serverPort){
 		this.sensorQ = sensorQ;
+		this.ipAddr = ipAddr;
 		this.sensorKey = sensorKey;
 		this.serverIpAddr = serverIpAddr;
 		this.serverPort = serverPort;
-		this.ipAddr = ipAddr;
 	}
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+		
+		Socket socket;
 		while(true){
 			try {
-				Float newValue = sensorQ.take();
-				sendData(newValue);
-			} catch (InterruptedException e) {
-				System.err.println("ERROR: SensorNodeClient interrupted.");
+				try {
+					socket = new Socket(serverIpAddr, serverPort);
+					OutputStream os = socket.getOutputStream();
+					ObjectOutputStream objOut = new ObjectOutputStream(os);
+
+					Float newValue = sensorQ.take();
+//					System.out.println("Sending new data! " + sensorKey + ": " + newValue);
+					//						String[] sensorKeyParts = sensorKey.split(".");
+					HashMap<String,Float> outMap = new HashMap<String,Float>();
+					outMap.put(sensorKey, newValue);
+					objOut.writeObject(outMap);
+					objOut.flush();
+					/*
+					 * JSON message format: { "node-ip-addr" : ipAddr, "sensor-type" : sensorKey name,
+					 * 							"sensor-location" : int, "data-value" : float}
+					 */
+					// ObjectMapper mapper = new ObjectMapper();
+
+				} catch (InterruptedException e) {
+					System.err.println("ERROR: SensorNodeClient interrupted.");
+				}
+
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				return;
 			}
 		}
-	}
-	
-	/**
-	 * Takes a floating point data value and pacakges it into a JSON message for the
-	 * DataCollectionServer.
-	 * @param dataValue
-	 */
-	private final void sendData(Float dataValue){
-		System.out.println("Sending new data! " + sensorKey + ": " + dataValue);
-		
-		String[] sensorKeyParts = sensorKey.split(".");
-		/*
-		 * JSON message format: { "node-ip-addr" : ipAddr, "sensor-type" : sensorKey name,
-		 * 							"sensor-location" : int, "data-value" : float}
-		 */
 	}
 	
 //	public static void main(String argv[]) throws Exception {
