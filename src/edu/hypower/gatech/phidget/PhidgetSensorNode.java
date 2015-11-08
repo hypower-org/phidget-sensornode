@@ -136,10 +136,6 @@ public class PhidgetSensorNode {
 
 	}
 	
-//	public final ConcurrentHashMap<String, BlockingQueue<Float>> getRawDataMap() {
-//		return rawDataMap;
-//	}
-
 	public final ArrayList<String> getSensorNames(){
 		final ArrayList<String> sensors = new ArrayList<String>();
 		for(String s : rawDataMap.keySet()){
@@ -152,25 +148,6 @@ public class PhidgetSensorNode {
 
 		final PhidgetSensorNode node = new PhidgetSensorNode("");
 
-		// Example runnable that only takes action only when a new data value is on the queue. Hardcoded for now.
-//		Runnable r = new Runnable(){
-//
-//			@Override
-//			public void run() {
-//				while(true){
-//					try {								
-//						Float f = node.getRawDataMap().get("temperature.0").take();
-//						System.out.println(Thread.currentThread().getName() + " new data = " + f);
-//					} catch (InterruptedException e) {
-//						
-//						e.printStackTrace();
-//					}
-//				}
-//			}	
-//		};
-//		Thread reader = new Thread(r);
-//		reader.start();
-		
 		while (true) {
 			try {
 				Thread.sleep(2000);
