@@ -1,23 +1,24 @@
 package edu.hypower.gatech.phidget.comm;
 
 import java.io.*;
+import java.net.*;
 import java.util.concurrent.*;
 
-public class Producer 
+public class Consumer implements Runnable
 {
     protected ArrayBlockingQueue queue = null;
-
-    public Producer(ArrayBlockingQueue queue) 
+    public Consumer(ArrayBlockingQueue queue) 
     {
         this.queue = queue;
     }
 
-    public void push(String s)
+    public void run() 
     {
         try {
-            queue.put(s);
+           System.out.println(queue.take());
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } 
+        }
     }
 }
+

@@ -3,7 +3,7 @@ package edu.hypower.gatech.phidget.comm;
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
-
+import java.util.*;
 /**
  * The client side of the PhidgetSensorNode.
  * @author pjmartin
@@ -17,23 +17,16 @@ public class SensorNodeClient
         // with server, the port number is 1234
         Socket socket = new Socket("127.0.0.1", 1234);
         
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
-        // Create a Blocking Queue array
-        BlockingQueue queue = new ArrayBlockingQueue(1024);
-
-        // Create a new queue for the data (producer class)
-        Producer producer = new Producer(queue);
-
-        // Start the thread for receiving data from Producer queue
-        new Thread(producer).start();
+        PrintWriter o = new PrintWriter(socket.getOutputStream(), true);
         
-        out.println(queue.take());
-        out.println(queue.take());
-        out.println(queue.take());
+        // Jackson Library to pass strings
+        for(Integer i = 0; i < 10; i++)
+        {
+            o.println(i.toString());
+            Thread.sleep(899);
+        }
 
-        out.close();
+        o.close();
         socket.close();
-
     }
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.*;
  */
 public class SensorNodeServer 
 {
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws Exception
     {
         //  Create a serversocket object and set it to the port number
         //  from the client
@@ -19,22 +19,24 @@ public class SensorNodeServer
 
         Socket clientSocket = serverSocket.accept();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        BufferedReader i = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+        ArrayBlockingQueue queue = new ArrayBlockingQueue(1024);
+
+        Producer producer = new Producer(queue);
+
+        Consumer consumer = new Consumer(queue);
 
         // Create a string variable that is the data from the client
         String fromClient;
-        Integer sum = 0;
-
-        while((fromClient = in.readLine()) != null)
+        Thread.sleep(10000);
+        while((fromClient = i.readLine()) != null)
         {
-            // Conver the string to integer value
-            sum += Integer.valueOf(fromClient);
-            System.out.println("Client Message: " + fromClient);
+            new Thread(consumer).start();
+            producer.push(fromClient);         
         }
         
-        System.out.println("Sum = " + sum);
-
-        in.close();
+        i.close();
         clientSocket.close();
         serverSocket.close();
     }
