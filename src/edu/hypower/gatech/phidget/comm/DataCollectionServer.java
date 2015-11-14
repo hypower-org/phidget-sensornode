@@ -49,8 +49,9 @@ public class DataCollectionServer {
 					Future<ObjectInputStream> future = exec.submit(r);
 					FileWriter writer = new FileWriter("test.csv");
 					try {
-						writer.append(future.get().readObject().toString());
-						writer.flush();
+//						writer.append(future.get().readObject().toString());
+//						writer.flush();
+						writer.write(future.get().readObject().toString());
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -60,6 +61,9 @@ public class DataCollectionServer {
 					} catch (ExecutionException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+					}
+					finally{
+						writer.close();
 					}
 				//	System.out.println(future.get().readObject());
 				} catch (IOException e) {
