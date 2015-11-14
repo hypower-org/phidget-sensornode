@@ -47,20 +47,22 @@ public class DataCollectionServer {
 						}
 					};
 					Future<ObjectInputStream> future = exec.submit(r);
+					FileWriter writer = new FileWriter("test.csv");
 					try {
-						System.out.println(future.get().readObject());
+						writer.append(future.get().readObject().toString());
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
+				//	System.out.println(future.get().readObject());
 				} catch (IOException e) {
 					System.err.print("SERVER ERROR: client connection error.");
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 			socket.close();
