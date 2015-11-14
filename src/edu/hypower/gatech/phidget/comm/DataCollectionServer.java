@@ -47,7 +47,12 @@ public class DataCollectionServer {
 						}
 					};
 					Future<ObjectInputStream> future = exec.submit(r);
-					System.out.println(future.get());
+					try {
+						System.out.println(future.get().readObject());
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} catch (IOException e) {
 					System.err.print("SERVER ERROR: client connection error.");
 				} catch (InterruptedException e) {
