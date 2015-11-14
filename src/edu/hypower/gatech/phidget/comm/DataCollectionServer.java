@@ -50,9 +50,9 @@ public class DataCollectionServer {
 					Future<ObjectInputStream> future = exec.submit(r);
 					writer = new FileWriter("test.csv");
 					try {
-//						writer.append(future.get().readObject().toString());
-//						writer.flush();
-						writer.write(future.get().readObject().toString());
+						writer.append(future.get().readObject().toString());
+						writer.flush();
+						writer.close();
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -69,7 +69,6 @@ public class DataCollectionServer {
 				}
 			}
 			socket.close();
-			writer.close();
 			
 		} catch (IOException e) {
 			System.err.print("SERVER ERROR: Failed to bind to port " + port);

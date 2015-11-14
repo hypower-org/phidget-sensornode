@@ -14,7 +14,7 @@ public class JoystickSensorReader extends SensorReader {
 
 	@Override
 	public float convertFromRaw(int rawVal) {
-		return (float) rawVal/4.095;
+		return (float) ((float) rawVal/4.095);
 	}
 
 }

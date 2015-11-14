@@ -15,7 +15,7 @@ public class LightSensorReader extends SensorReader {
   //unit luminosity
 	@Override
 	public float convertFromRaw(int rawVal) {
-		return (float) (1.478777 * rawVal) + 33.67076;
+		return (float) ((float) (1.478777 * rawVal) + 33.67076);
 	}
 
 }

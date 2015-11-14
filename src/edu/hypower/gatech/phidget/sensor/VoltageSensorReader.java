@@ -14,7 +14,7 @@ public class VoltageSensorReader extends SensorReader {
 
 	@Override
 	public float convertFromRaw(int rawVal) {
-      return (float) ((rawVal/200) - 2.5)/0.0681;
+      return (float) ((float) ((rawVal/200) - 2.5)/0.0681);
 	}
 
 }
