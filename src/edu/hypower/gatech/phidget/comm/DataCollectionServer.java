@@ -38,6 +38,7 @@ public class DataCollectionServer {
 		try {
 			socket = new ServerSocket(port);
 			System.out.println("Data Collection Server started on port " + port);
+			FileWriter writer = null;
 			while(!isStopped){
 				try{
 					final Socket clientConn = socket.accept();
@@ -47,7 +48,7 @@ public class DataCollectionServer {
 						}
 					};
 					Future<ObjectInputStream> future = exec.submit(r);
-					FileWriter writer = new FileWriter("test.csv");
+					writer = new FileWriter("test.csv");
 					try {
 //						writer.append(future.get().readObject().toString());
 //						writer.flush();
@@ -62,15 +63,13 @@ public class DataCollectionServer {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					finally{
-						writer.close();
-					}
-				//	System.out.println(future.get().readObject());
+								//	System.out.println(future.get().readObject());
 				} catch (IOException e) {
 					System.err.print("SERVER ERROR: client connection error.");
 				}
 			}
 			socket.close();
+			writer.close();
 			
 		} catch (IOException e) {
 			System.err.print("SERVER ERROR: Failed to bind to port " + port);
