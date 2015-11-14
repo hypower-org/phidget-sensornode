@@ -50,6 +50,7 @@ public class DataCollectionServer {
 					FileWriter writer = new FileWriter("test.csv");
 					try {
 						writer.append(future.get().readObject().toString());
+						writer.flush();
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
