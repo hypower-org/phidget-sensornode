@@ -8,21 +8,24 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.io.FileWriter;
 
 public class DataCollectionServer {
 
-	public static final void handleClientConnection(Socket client){
+	public static final ObjectInputStream handleClientConnection(Socket client){
 		System.out.println("Received client data...");
 		try {
 			ObjectInputStream objIn = new ObjectInputStream(client.getInputStream());
-			System.out.println(objIn.readObject());
+			return objIn;
+//			System.out.println(objIn.readObject());
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Done.");
+		return null;
 	}
 	
 	public static void main(String[] args){
@@ -38,15 +41,21 @@ public class DataCollectionServer {
 			while(!isStopped){
 				try{
 					final Socket clientConn = socket.accept();
-					Runnable r = new Runnable(){
-						public void run() {
-							handleClientConnection(clientConn);
+					Callable r = new Callable(){
+						public ObjectInputStream call() {
+							return handleClientConnection(clientConn);
 						}
 					};
-					exec.execute(r);
-					
+					Future<ObjectInputStream> future = exec.submit(r);
+					System.out.println(future.get());
 				} catch (IOException e) {
 					System.err.print("SERVER ERROR: client connection error.");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			socket.close();
