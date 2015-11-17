@@ -7,18 +7,19 @@ import com.phidgets.event.SensorChangeListener;
 import java.util.concurrent.*;
 //import edu.hypower.gatech.phidget.*;
 
+@Deprecated
 public class HelloInterfaceKit {
 
-	public static void main(String[] args){
-		
+	public static void main(String[] args) {
+
 		final long motionPeriod = 100;
 		final long tempPeriod = 500;
 		final long humidPeriod = 1000;
     final long forcePeriod = 100;
     final long lightPeriod = 100;
 
-		final ConcurrentHashMap<String,Float> dataMap = new ConcurrentHashMap<String, Float>();
-		
+		final ConcurrentHashMap<String, Float> dataMap = new ConcurrentHashMap<String, Float>();
+
 		try {
 			System.out.println("Attaching the Interface Kit Phidget...");
 			final InterfaceKitPhidget ikit = new InterfaceKitPhidget();
@@ -26,10 +27,11 @@ public class HelloInterfaceKit {
 			ikit.waitForAttachment();
 			System.out.println("complete.");
 			ikit.setRatiometric(true);
-			
-			ScheduledExecutorService exec = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-			
-			Runnable tempTask = new Runnable(){
+
+			ScheduledExecutorService exec = Executors
+					.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+
+			Runnable tempTask = new Runnable() {
 				public void run() {
 					// temp
 					try {
@@ -40,8 +42,8 @@ public class HelloInterfaceKit {
 					}
 				}
 			};
-			
-			Runnable humidTask = new Runnable(){
+
+			Runnable humidTask = new Runnable() {
 				public void run() {
 					// humidity
 					try {
@@ -51,10 +53,10 @@ public class HelloInterfaceKit {
 						e.printStackTrace();
 					}
 				}
-				
+
 			};
-			
-			Runnable motionTask = new Runnable(){
+
+			Runnable motionTask = new Runnable() {
 				public void run() {
 					// motion
 					try {
@@ -93,10 +95,13 @@ public class HelloInterfaceKit {
 			exec.scheduleAtFixedRate(tempTask, 0, tempPeriod, TimeUnit.MILLISECONDS);
 			exec.scheduleAtFixedRate(humidTask, 0, humidPeriod, TimeUnit.MILLISECONDS);
 			exec.scheduleAtFixedRate(motionTask, 0, motionPeriod, TimeUnit.MILLISECONDS);
+<<<<<<< HEAD
       exec.scheduleAtFixedRate(forceTask, 0, forcePeriod, TimeUnit.MILLISECONDS);
       exec.scheduleAtFixedRate(lightTask, 0, lightPeriod, TimeUnit.MILLISECONDS);
+=======
+>>>>>>> 7c696975d95b44ad7c9b3ceace618e97ce577124
 
-			while(true){
+			while (true) {
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
@@ -104,12 +109,11 @@ public class HelloInterfaceKit {
 				}
 				System.out.println(dataMap);
 			}
-			
+
 		} catch (PhidgetException e) {
 			e.printStackTrace();
 		}
-		
-		
+
 	}
-	
+
 }

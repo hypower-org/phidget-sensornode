@@ -6,23 +6,24 @@ package edu.hypower.gatech.phidget;
  * @author Patrick J.Martin
  */
 
+@Deprecated
 public class RawDataConverter {
-	
+
 	/*
 	 * Converts raw sensor value into temperature in celsius.
 	 */
-	public static final float temperatureCelsius(int rawVal){
-		return (float) (( rawVal * 0.22222 ) - 61.11);
+	public static final float temperatureCelsius(int rawVal) {
+		return (float) ((rawVal * 0.22222) - 61.11);
 	}
-	
-	public static final float toFarenheit(float tempC){
+
+	public static final float toFarenheit(float tempC) {
 		return (tempC * 1.8f) + 32f;
 	}
-	
+
 	/*
 	 * Converts a raw sensor value into relative humidity in %.
 	 */
-	public static final float relativeHumidity(int rawVal){
-		return (float) (( rawVal * 0.1906 ) - 40.2);
+	public static final float relativeHumidity(int rawVal) {
+		return (float) ((rawVal * 0.1906) - 40.2);
 	}
 }
