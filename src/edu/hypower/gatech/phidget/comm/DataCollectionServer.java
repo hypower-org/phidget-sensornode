@@ -23,12 +23,13 @@ public class DataCollectionServer {
 		System.out.println("Received client data...");
 		try {
 			ObjectInputStream objIn = new ObjectInputStream(client.getInputStream());
-			HashMap<String, Float> dataMap = (HashMap<String, Float>) objIn.readObject();
-			for(String key: dataMap.keySet()){
+			System.out.println(objIn.readObject());
+//			HashMap<String, Float> dataMap = (HashMap<String, Float>) objIn.readObject();
+//			for(String key: dataMap.keySet()){
 //				System.out.println(key);
-				dataQ.offer(dataMap.get(key));
-				return key;
-			}
+//				dataQ.offer(dataMap.get(key));
+				return null;
+		//}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
