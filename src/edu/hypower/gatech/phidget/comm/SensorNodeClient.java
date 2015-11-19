@@ -6,13 +6,10 @@ import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.io.IOException;
 
-//import com.fasterxml.jackson.core.JsonGenerator;
-//import com.fasterxml.jackson.databind.JsonNode;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.annotation.JacksonInject;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The client side of the PhidgetSensorNode.
@@ -35,7 +32,7 @@ public class SensorNodeClient implements Runnable {
         this.serverIpAddr = serverIpAddr;
         this.serverPort = serverPort;
     }
-
+    
     @Override
     public void run() {
 
@@ -48,21 +45,21 @@ public class SensorNodeClient implements Runnable {
                     ObjectOutputStream objOut = new ObjectOutputStream(os);
 
                     Float newValue = sensorQ.take();
-                    //					System.out.println("Sending new data! " + sensorKey + ": " + newValue);
-                    //						String[] sensorKeyParts = sensorKey.split(".");
-                    //					HashMap<String,Float> outMap = new HashMap<String,Float>();
-                    //					outMap.put(sensorKey, newValue);
                     /*
                      * JSON message format: { "node-ip-addr" : ipAddr, "sensor-type" : sensorKey name,
                      * 							"sensor-location" : int, "data-value" : float}
                      */
                     // Create ObjectMapper object. it is an reusable object
                     ObjectMapper mapper = new ObjectMapper();
+                    String jsonString = "{\"node-ip-addr\":" + "\"" + ipAddr + "\""   
+                    + ",\"sensor-type\":" + "\""  + sensorKey.substring(0,sensorKey.length() - 2) + "\""
+                    + ",\"sensor-location\":" + sensorKey.substring(sensorKey.length() - 1,sensorKey.length()) + ",\"data-value\":" +  "\""  + Float.toString(newValue)+  "\"" + "}";
+//                    String jsonString = "String";
                     // Deserialize JSON to Object
-                    String jsonString = "{\"node-ip-addr\":ipAddr,\"sensor-type\":sensorKey,\"sensor-location\": Integer.toString(sensorKey.substr(sensorKey.size()-1,1)),\"data-value\": Float.toString(sensorQ.take())}";
+//                  Object msg = mapper.readValue(jsonString, Object.class);
+                    System.out.println(jsonString);
 
-                    jsonString = mapper.writeValueAsString(jsonString);
-                    objOut.writeObject(outMap);
+                    objOut.writeObject(jsonString);
                     objOut.flush();
 
 
@@ -76,19 +73,4 @@ public class SensorNodeClient implements Runnable {
             }
         }
     }
-    /*	
-        public static void main(String argv[]) throws Exception {
-        String sentence;
-        String modifiedSentence;
-        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-        Socket clientSocket = new Socket("localhost", 6789);
-        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        sentence = inFromUser.readLine();
-        outToServer.writeBytes(sentence + '\n');
-        modifiedSentence = inFromServer.readLine();
-        System.out.println("FROM SERVER: " + modifiedSentence);
-        clientSocket.close();
-        }
-        */	
 }
