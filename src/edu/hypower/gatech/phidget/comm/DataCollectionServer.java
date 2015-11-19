@@ -16,6 +16,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.io.FileWriter;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.*;
+import org.codehaus.jackson.map.*;
+
 public class DataCollectionServer {
 	public static final ArrayBlockingQueue<Float> dataQ = new ArrayBlockingQueue<Float>(48);
 	
@@ -23,12 +29,16 @@ public class DataCollectionServer {
 		System.out.println("Received client data...");
 		try {
 			ObjectInputStream objIn = new ObjectInputStream(client.getInputStream());
-			System.out.println(objIn.readObject());
+     ObjectMapper mapper = new ObjectMapper();
+     String ret = (String) objIn.readObject();
+      JsonNode root = mapper.readTree(ret);
+      float val = Float.parseFloat(root.get("data-value").asText());
+//			System.out.println(val);
 //			HashMap<String, Float> dataMap = (HashMap<String, Float>) objIn.readObject();
 //			for(String key: dataMap.keySet()){
 //				System.out.println(key);
-//				dataQ.offer(dataMap.get(key));
-				return null;
+				dataQ.offer(val);
+				return ret;
 		//}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -58,7 +68,7 @@ public class DataCollectionServer {
 					Callable r = new Callable(){
 						public String call() {
 							String ret = handleClientConnection(clientConn);
-							System.out.println(ret + " queue size:" + dataQ.size());
+//							System.out.println(ret + " queue size:" + dataQ.size());
 							return ret;
 						}
 					};
