@@ -1,3 +1,5 @@
+package edu.hypower.gatech.phidget;
+
 import java.net.*;
 
 public class InetAddressExample

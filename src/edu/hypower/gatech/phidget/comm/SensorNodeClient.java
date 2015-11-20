@@ -51,17 +51,14 @@ public class SensorNodeClient implements Runnable {
                      */
                     // Create ObjectMapper object. it is an reusable object
                     ObjectMapper mapper = new ObjectMapper();
-                    String jsonString = "{\"node-ip-addr\":" + "\"" + ipAddr + "\""   
-                    + ",\"sensor-type\":" + "\""  + sensorKey.substring(0,sensorKey.length() - 2) + "\""
-                    + ",\"sensor-location\":" + sensorKey.substring(sensorKey.length() - 1,sensorKey.length()) + ",\"data-value\":" +  "\""  + Float.toString(newValue)+  "\"" + "}";
-//                    String jsonString = "String";
-                    // Deserialize JSON to Object
-//                  Object msg = mapper.readValue(jsonString, Object.class);
-                    System.out.println(jsonString);
+                    // TODO: We should be using the Jackson library to build this packet up!
+                    String jsonString = 
+                    		"{\"node-ip-addr\":" + "\"" + ipAddr + "\""   
+		                    + ",\"sensor-type\":" + "\""  + sensorKey.substring(0,sensorKey.length() - 2) + "\""
+		                    + ",\"sensor-location\":" + sensorKey.substring(sensorKey.length() - 1,sensorKey.length()) + ",\"data-value\":" +  "\""  + Float.toString(newValue)+  "\"" + "}";
 
                     objOut.writeObject(jsonString);
                     objOut.flush();
-
 
                 } catch (InterruptedException e) {
                     System.err.println("ERROR: SensorNodeClient interrupted.");

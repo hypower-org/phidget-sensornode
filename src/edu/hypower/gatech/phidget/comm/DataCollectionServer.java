@@ -2,6 +2,7 @@ package edu.hypower.gatech.phidget.comm;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Inet4Address;
@@ -20,94 +21,110 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DataCollectionServer {
-	public static final ArrayBlockingQueue<Float> dataQ = new ArrayBlockingQueue<Float>(48);
-	
-	public static final String handleClientConnection(Socket client){
+public class DataCollectionServer implements Runnable {
+
+	// Blocking queue of 2^8 floats - just because!
+	public static final ArrayBlockingQueue<Float> dataQ = new ArrayBlockingQueue<Float>(256);
+	private BufferedWriter fileWriter;
+	private final int port;
+	private final ExecutorService exec = Executors.newCachedThreadPool();
+	private ServerSocket socket;
+	private boolean isStopped = false;
+
+	public DataCollectionServer(int port){
+		this.port = port;
+		try {
+			socket = new ServerSocket(this.port);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			fileWriter = new BufferedWriter(new FileWriter("test.csv", true));
+		} catch (IOException e) {
+
+		}
+		Runnable dataWriter = new Runnable(){
+			@Override
+			public void run() {
+				while(true){
+					try {
+						Float newValue = dataQ.take();
+						// If we get negative infinity, shutdown the file.
+						System.out.println("Incoming value = " + newValue);
+						if(newValue == Float.NEGATIVE_INFINITY){
+							System.out.println("Received poison pill! Close!");
+							fileWriter.flush();
+							fileWriter.close();
+							isStopped = true;
+							return;
+						} else {
+							fileWriter.write(Float.toString(newValue) + ",");
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+
+		exec.execute(dataWriter);
+		exec.execute(this);
+		
+	}
+
+	private final void handleClientConnection(Socket client) throws IOException {
 		System.out.println("Received client data...");
 		try {
 			ObjectInputStream objIn = new ObjectInputStream(client.getInputStream());
-     ObjectMapper mapper = new ObjectMapper();
-     String ret = (String) objIn.readObject();
-      JsonNode root = mapper.readTree(ret);
-      float val = Float.parseFloat(root.get("data-value").asText());
-//			System.out.println(val);
-//			HashMap<String, Float> dataMap = (HashMap<String, Float>) objIn.readObject();
-//			for(String key: dataMap.keySet()){
-//				System.out.println(key);
-				dataQ.offer(val);
-				return ret;
-		//}
+			ObjectMapper mapper = new ObjectMapper();
+			String ret = (String) objIn.readObject();
+			JsonNode root = mapper.readTree(ret);
+			float val = Float.parseFloat(root.get("data-value").asText());
+			dataQ.offer(val);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} 
+	}
+
+	@Override
+	public void run() {
+		System.out.println("Data Collection Server started on port " + port);
+		while(!isStopped){
+			try{
+				final Socket clientConn = socket.accept();
+				Runnable r = new Runnable(){
+					@Override
+					public void run() {
+						try {
+							handleClientConnection(clientConn);
+						} catch (IOException e) {
+							System.err.println("Uh oh - IO exception on data input: " + e.getCause());
+							dataQ.offer(Float.NEGATIVE_INFINITY);
+						}
+					}
+				};
+
+				exec.submit(r);
+			} catch (IOException e) {
+				System.err.print("SERVER ERROR: client connection error.");
+			} 
+		}
+		try {
+			System.out.println("Server stopped.");
+			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		System.out.println("Done.");
-		return null ;
+		// Ugly - make a future instead!
+		System.exit(0);
 	}
-	
+
 	public static void main(String[] args){
-	
+
 		// Main server logic in main; spawns the data handlers into the executor.
 		int port = Integer.parseInt(args[0]);
-		ServerSocket socket;
-		ExecutorService exec = Executors.newCachedThreadPool();
-		
-		boolean isStopped = false;
-		try {
-			socket = new ServerSocket(port);
-			System.out.println("Data Collection Server started on port " + port);
-			FileWriter writer = null;
-			while(!isStopped){
-				try{
-					final Socket clientConn = socket.accept();
-					Callable r = new Callable(){
-						public String call() {
-							String ret = handleClientConnection(clientConn);
-//							System.out.println(ret + " queue size:" + dataQ.size());
-							return ret;
-						}
-					};
-					
-					Runnable fileWriter = new Runnable() {
-						public void run() {
-							BufferedWriter writer = null;
-							try {
-								writer = new BufferedWriter(new FileWriter("test.csv", true));
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							try {
-								writer.write(Float.toString(dataQ.take())+",");
-							} catch (IOException | InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							try {
-								writer.close();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					};
-					exec.submit(r);
-					exec.execute(fileWriter);
-				} catch (IOException e) {
-					System.err.print("SERVER ERROR: client connection error.");
-				}
-			}
-			socket.close();
-			
-		} catch (IOException e) {
-			System.err.print("SERVER ERROR: Failed to bind to port " + port);
-			System.exit(-1);
-		}
-		
-		
+		DataCollectionServer dcs = new DataCollectionServer(port);
+
 	}
-	
+
 }

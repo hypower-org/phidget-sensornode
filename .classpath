@@ -16,6 +16,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/vlnguyen92/Desktop/Eclipse workspace/phidget21.jar"/>
+	<classpathentry kind="lib" path="/home/pjmartin/code/phidget21.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

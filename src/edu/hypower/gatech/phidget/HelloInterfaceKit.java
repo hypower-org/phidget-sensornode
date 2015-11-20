@@ -15,8 +15,8 @@ public class HelloInterfaceKit {
 		final long motionPeriod = 100;
 		final long tempPeriod = 500;
 		final long humidPeriod = 1000;
-    final long forcePeriod = 100;
-    final long lightPeriod = 100;
+		final long forcePeriod = 100;
+		final long lightPeriod = 100;
 
 		final ConcurrentHashMap<String, Float> dataMap = new ConcurrentHashMap<String, Float>();
 
@@ -68,38 +68,33 @@ public class HelloInterfaceKit {
 				}
 			};
 
-      Runnable forceTask = new Runnable(){
-          public void run() {
-              // force
-              try {
-                  float currForce = ikit.getSensorValue(3);
-                  dataMap.put("F", currForce);
-              } catch (PhidgetException e) {
-                  e.printStackTrace();
-              }
-          }
-      };
+			Runnable forceTask = new Runnable(){
+				public void run() {
+					// force
+					try {
+						float currForce = ikit.getSensorValue(3);
+						dataMap.put("F", currForce);
+					} catch (PhidgetException e) {
+						e.printStackTrace();
+					}
+				}
+			};
 
-      Runnable lightTask = new Runnable(){
-          public void run() {
-              //light
-              try {
-                  float currLight = ikit.getSensorValue(4);
-                  dataMap.put("L", currLight);
-              } catch (PhidgetException e) {
-                  e.printStackTrace();
-              }
-          }
-      };
+			Runnable lightTask = new Runnable(){
+				public void run() {
+					//light
+					try {
+						float currLight = ikit.getSensorValue(4);
+						dataMap.put("L", currLight);
+					} catch (PhidgetException e) {
+						e.printStackTrace();
+					}
+				}
+			};
 
 			exec.scheduleAtFixedRate(tempTask, 0, tempPeriod, TimeUnit.MILLISECONDS);
 			exec.scheduleAtFixedRate(humidTask, 0, humidPeriod, TimeUnit.MILLISECONDS);
 			exec.scheduleAtFixedRate(motionTask, 0, motionPeriod, TimeUnit.MILLISECONDS);
-<<<<<<< HEAD
-      exec.scheduleAtFixedRate(forceTask, 0, forcePeriod, TimeUnit.MILLISECONDS);
-      exec.scheduleAtFixedRate(lightTask, 0, lightPeriod, TimeUnit.MILLISECONDS);
-=======
->>>>>>> 7c696975d95b44ad7c9b3ceace618e97ce577124
 
 			while (true) {
 				try {
