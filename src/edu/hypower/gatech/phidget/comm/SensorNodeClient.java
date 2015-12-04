@@ -61,7 +61,7 @@ public class SensorNodeClient implements Runnable {
                     objOut.flush();
 
                 } catch (InterruptedException e) {
-                    System.err.println("ERROR: SensorNodeClient interrupted.");
+                	System.err.println("ERROR: SensorNodeClient interrupted.");
                 }
 
             } catch (IOException e1) {

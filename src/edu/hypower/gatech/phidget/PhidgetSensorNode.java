@@ -154,7 +154,7 @@ public class PhidgetSensorNode {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Node running: " + node.getSensorNames());
+//			System.out.println("Node running: " + node.getSensorNames());
 		}
 	}
 

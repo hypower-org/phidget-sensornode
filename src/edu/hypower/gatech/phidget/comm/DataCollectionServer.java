@@ -24,13 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DataCollectionServer implements Runnable {
 
 	// Blocking queue of 2^8 floats - just because!
-	public static final ArrayBlockingQueue<Float> dataQ = new ArrayBlockingQueue<Float>(256);
-	private BufferedWriter fileWriter;
+	public static final ArrayBlockingQueue<NodeData> dataQ = new ArrayBlockingQueue<NodeData>(256);
+//	private BufferedWriter fileWriter;
 	private final int port;
 	private final ExecutorService exec = Executors.newCachedThreadPool();
 	private ServerSocket socket;
 	private boolean isStopped = false;
-	private String ipAdd = null;
 
 	public DataCollectionServer(int port){
 		this.port = port;
@@ -43,26 +42,15 @@ public class DataCollectionServer implements Runnable {
 		Runnable dataWriter = new Runnable(){
 			@Override
 			public void run() {
-				try {
-					String fileName = "test" + ipAdd + ".csv";
-					fileWriter = new BufferedWriter(new FileWriter(fileName, true));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 				while(true){
 					try {
-						Float newValue = dataQ.take();
-						// If we get negative infinity, shutdown the file.
-						System.out.println("Incoming value = " + newValue);
-						if(newValue == Float.NEGATIVE_INFINITY){
-							System.out.println("Received poison pill! Close!");
-							fileWriter.flush();
-							fileWriter.close();
-							isStopped = true;
-							return;
-						} else {
-							fileWriter.write(Float.toString(newValue) + ",");
-						}
+						NodeData newNodeData = dataQ.take();
+						System.out.println("Incoming data: " + newNodeData.getNodeId() + ", " + newNodeData.getDataType());
+						String fileName = newNodeData.getNodeId() + "-" + newNodeData.getDataType() + ".csv";
+						BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileName, true));			
+						fileWriter.write(Float.toString(newNodeData.getNodeDataVal()) + ",");
+						fileWriter.flush();
+						fileWriter.close();
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -83,8 +71,10 @@ public class DataCollectionServer implements Runnable {
 			String ret = (String) objIn.readObject();
 			JsonNode root = mapper.readTree(ret);
 			float val = Float.parseFloat(root.get("data-value").asText());
-			ipAdd = root.get("node-ip-addr").asText();
-			dataQ.offer(val);
+			String ipAddr = root.get("node-ip-addr").asText();
+			String type = root.get("sensor-type").asText();
+			NodeData nd = new NodeData(ipAddr, type, val);
+			dataQ.offer(nd);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} 
@@ -103,7 +93,8 @@ public class DataCollectionServer implements Runnable {
 							handleClientConnection(clientConn);
 						} catch (IOException e) {
 							System.err.println("Uh oh - IO exception on data input: " + e.getCause());
-							dataQ.offer(Float.NEGATIVE_INFINITY);
+							// TODO: need more graceful shutdown of all these handlers!
+//							dataQ.offer(Float.NEGATIVE_INFINITY);
 						}
 					}
 				};
@@ -128,6 +119,32 @@ public class DataCollectionServer implements Runnable {
 		// Main server logic in main; spawns the data handlers into the executor.
 		int port = Integer.parseInt(args[0]);
 		DataCollectionServer dcs = new DataCollectionServer(port);
+	}
+	
+	private class NodeData {
+		
+		private final String nodeId;
+		private final String dataType;
+		private final Float nodeDataVal;
+		
+		public NodeData(String id, String type, Float data){
+			nodeId = id;
+			dataType = type;
+			nodeDataVal = data;
+		}
+
+		public final String getNodeId() {
+			return nodeId;
+		}
+
+		public final String getDataType() {
+			return dataType;
+		}
+
+		public final Float getNodeDataVal() {
+			return nodeDataVal;
+		}
+		
 	}
 
 }

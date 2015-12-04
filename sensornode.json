@@ -1,13 +1,7 @@
 {
 	"ip-address" : "127.0.0.1",
 	"sensors" : { "temperature" : { "location" : 0, "update-period" : 500 },
-				  "humidity" : { "location" : 1, "update-period" : 1000 },
-				  "motion" : { "location" : 2, "update-period" : 250 },
-				  "light" : { "location" : 3, "update-period" : 500 },
-				  "voltage" : { "location" : 4, "update-period" : 500 },
-				  "force" : { "location" : 5, "update-period" : 1000 },
-				  "current" : { "location" : 6, "update-period" : 1000 },
-				  "light" : { "location" : 7, "update-period" : 500 }
+				  "humidity" : { "location" : 1, "update-period" : 1000 }
 				},
 	"server-ip-addr" : "127.0.0.1",
 	"server-port" : 4444
