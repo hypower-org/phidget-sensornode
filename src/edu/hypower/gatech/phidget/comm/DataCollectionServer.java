@@ -30,6 +30,7 @@ public class DataCollectionServer implements Runnable {
 	private final ExecutorService exec = Executors.newCachedThreadPool();
 	private ServerSocket socket;
 	private boolean isStopped = false;
+	private String ipAdd = null;
 
 	public DataCollectionServer(int port){
 		this.port = port;
@@ -38,14 +39,16 @@ public class DataCollectionServer implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		try {
-			fileWriter = new BufferedWriter(new FileWriter("test.csv", true));
-		} catch (IOException e) {
-
-		}
+		
 		Runnable dataWriter = new Runnable(){
 			@Override
 			public void run() {
+				try {
+					String fileName = "test" + ipAdd + ".csv";
+					fileWriter = new BufferedWriter(new FileWriter(fileName, true));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				while(true){
 					try {
 						Float newValue = dataQ.take();
@@ -80,6 +83,7 @@ public class DataCollectionServer implements Runnable {
 			String ret = (String) objIn.readObject();
 			JsonNode root = mapper.readTree(ret);
 			float val = Float.parseFloat(root.get("data-value").asText());
+			ipAdd = root.get("node-ip-addr").asText();
 			dataQ.offer(val);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -124,7 +128,6 @@ public class DataCollectionServer implements Runnable {
 		// Main server logic in main; spawns the data handlers into the executor.
 		int port = Integer.parseInt(args[0]);
 		DataCollectionServer dcs = new DataCollectionServer(port);
-
 	}
 
 }
