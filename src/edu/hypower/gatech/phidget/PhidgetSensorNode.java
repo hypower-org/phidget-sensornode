@@ -43,6 +43,9 @@ public class PhidgetSensorNode {
 	private final HashMap<String, Runnable> sensorClientRunners = new HashMap<String, Runnable>();
 	
 	private String nodeIpAddr;
+	private boolean isReady = false;
+	
+	private final int TIMEOUT = 5000; // 5s wait time
 
 	public PhidgetSensorNode(String pathToConfig) {
 
@@ -62,7 +65,7 @@ public class PhidgetSensorNode {
 				// Phidget initialization
 				InterfaceKitPhidget ikit = new InterfaceKitPhidget();
 				ikit.openAny();
-				ikit.waitForAttachment();
+				ikit.waitForAttachment(TIMEOUT);
 				System.out.println("complete.");
 				ikit.setRatiometric(true);
 
@@ -97,6 +100,8 @@ public class PhidgetSensorNode {
 						schedExec.scheduleAtFixedRate(sensorUpdateRunners.get(sensorKey), 0, updatePeriod, TimeUnit.MILLISECONDS);
 						exec.submit(sensorClientRunners.get(sensorKey));
 						
+						isReady = true;
+						
 					} catch (ClassNotFoundException cnfe){
 						System.err.println("ERROR: " + sensorName + " not implemented.");
 						
@@ -121,8 +126,7 @@ public class PhidgetSensorNode {
 					}
 				}
 			} catch (PhidgetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.println("Error: Timeout ( " + TIMEOUT + "ms) reached. No phidget Interface Kit detected.");
 			}
 
 
@@ -144,17 +148,23 @@ public class PhidgetSensorNode {
 		return sensors;
 	}
 	
+	public boolean isReady() {
+		return isReady;
+	}
+
 	public static void main(String[] args) {
 
 		final PhidgetSensorNode node = new PhidgetSensorNode("");
 
-		while (true) {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		if(node.isReady()){
+			while (true) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+//				System.out.println("Node running: " + node.getSensorNames());
 			}
-//			System.out.println("Node running: " + node.getSensorNames());
 		}
 	}
 
