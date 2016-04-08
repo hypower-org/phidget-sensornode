@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.LocalMap;
 
 /**
  * Class that spawns the DataCollectionVerticle.
@@ -20,6 +21,7 @@ public class DataPublisherBootstrap {
 		VertxOptions opt = new VertxOptions()
 							.setWorkerPoolSize(Runtime.getRuntime().availableProcessors());
 		
+		
 		Handler<AsyncResult<Vertx>> resultHandler = new Handler<AsyncResult<Vertx>>(){
 
 			@Override
@@ -28,13 +30,26 @@ public class DataPublisherBootstrap {
 					System.out.println("Clustered DataPublisher started.");
 					Vertx vertx = result.result();
 					
+					
+					
+					Long sharedDataTimerId = vertx.setPeriodic(333, new Handler<Long>(){
+						@Override
+						public void handle(Long event) {
+							
+							LocalMap<String,Long>  map = vertx.sharedData().getLocalMap("SensorData");
+							map.put("temp", System.currentTimeMillis());
+							
+						}
+					});
+					
 					Long timerId = vertx.setPeriodic(1000, new Handler<Long>(){
 						@Override
 						public void handle(Long arg0) {
 							JsonObject dataMsg = new JsonObject();
 							dataMsg.put("isLive", true);
+							dataMsg.put("tempTime", vertx.sharedData().getLocalMap("SensorData").get("temp"));
 							JsonArray data = new JsonArray();
-							for(int i = 0; i < 10; i++){
+							for(int i = 0; i < 4; i++){
 								data.add(Math.random() * i);
 							}
 							dataMsg.put("data", data);
@@ -49,6 +64,6 @@ public class DataPublisherBootstrap {
 			}
 			
 		};
-		Vertx.factory.clusteredVertx(opt, resultHandler);
+		Vertx.factory.clusteredVertx(opt, resultHandler);		
 	}
 }
