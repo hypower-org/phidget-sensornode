@@ -11,8 +11,8 @@ public class PhidgetSensorNodeBootstrap {
 	public static void main(String[] args){
 		
 		VertxOptions opts = new VertxOptions()
-				.setWorkerPoolSize(Runtime.getRuntime().availableProcessors())
-				.setClusterHost("10.0.0.100");
+				.setWorkerPoolSize(Runtime.getRuntime().availableProcessors());
+//				.setClusterHost("10.0.0.100");
 		// TODO: add config for clustering host/port, etc.
 		
 		Handler<AsyncResult<Vertx>> resultHandler = new Handler<AsyncResult<Vertx>>(){
