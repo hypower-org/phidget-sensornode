@@ -24,8 +24,8 @@ public class DataCollectionServerBootstrap {
     private static final String address2 = "127.0.0.1.humidity.1";
 
     public static void main(String[] args) {
-        VertxOptions opt = new VertxOptions().setWorkerPoolSize(Runtime.getRuntime().availableProcessors())
-                .setClusterHost("10.0.0.2");
+        VertxOptions opt = new VertxOptions().setWorkerPoolSize(Runtime.getRuntime().availableProcessors());
+//                .setClusterHost("10.0.0.2");
 
 
         Handler<AsyncResult<Vertx>> resultHandler = new Handler<AsyncResult<Vertx>>() {

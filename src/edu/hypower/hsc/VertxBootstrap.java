@@ -1,5 +1,7 @@
 package edu.hypower.hsc;
 
+import java.util.ArrayList;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -23,11 +25,14 @@ public class VertxBootstrap {
 			opts.setClusterHost(clusterIp);
 		}
 		
+		final ArrayList<String> deployIds = new ArrayList<String>();
 		Handler<AsyncResult<Vertx>> startupHandler = new Handler<AsyncResult<Vertx>>(){
 			@Override
 			public void handle(AsyncResult<Vertx> r) {
 				Vertx vertx = r.result();
-				vertx.deployVerticle(new KernelVerticle());
+				final String id;
+				vertx.deployVerticle(new KernelVerticle(), 
+						res -> { deployIds.add(res.result()); });
 
 				vertx.setTimer(2000, new Handler<Long>(){
 					@Override
